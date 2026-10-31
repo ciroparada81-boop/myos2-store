@@ -1,0 +1,58 @@
+// PIZARRA - Mouse: dibujar. 1-8: color. + / -: grosor. E: goma. C: borrar todo. ESC: salir.
+window(560, 420, "Pizarra");
+var pal = [WHITE, RED, ORANGE, YELLOW, GREEN, CYAN, BLUE, PINK];
+var color = 0;
+var size = 4;
+var eraser = false;
+var BG = rgb(20, 24, 40);
+var px = -1;
+var py = -1;
+
+fn bar() {
+    fill(0, 0, 560, 34, rgb(32, 38, 62));
+    for (var i = 0; i < 8; i++) {
+        fill(8 + i * 34, 5, 28, 24, pal[i]);
+        if (i == color && !eraser) { rect(6 + i * 34, 3, 32, 28, WHITE); rect(7 + i * 34, 4, 30, 26, WHITE); }
+    }
+    var info = "Grosor " + str(size) + "   E: goma";
+    if (eraser) { info = "GOMA (grosor " + str(size) + ")  1-8: color"; }
+    text(290, 10, info, WHITE);
+}
+
+fn dot(x, y, c) { circle(x, y, size, c); }
+
+fn stroke(x0, y0, x1, y1, c) {
+    var dx = x1 - x0;
+    var dy = y1 - y0;
+    var n = max(abs(dx), abs(dy));
+    if (n < 1) { n = 1; }
+    for (var i = 0; i <= n; i += max(1, size / 2)) { dot(x0 + dx * i / n, y0 + dy * i / n, c); }
+    dot(x1, y1, c);
+}
+
+clear(BG);
+bar();
+flip();
+while (true) {
+    var k = key(8);
+    if (k == KEY_ESC) { break; }
+    var redraw = false;
+    if (k >= 49 && k <= 56) { color = k - 49; eraser = false; redraw = true; }
+    if (k == 101 || k == 69) { eraser = !eraser; redraw = true; }
+    if (k == 43) { size = min(24, size + 1); redraw = true; }
+    if (k == 45) { size = max(1, size - 1); redraw = true; }
+    if (k == 99 || k == 67) { clear(BG); redraw = true; }
+    if (mouseb() == 1) {
+        var x = mousex();
+        var y = mousey();
+        if (y < 34) {
+            if (x >= 8 && x < 8 + 8 * 34 && px < 0) { color = (x - 8) / 34; eraser = false; redraw = true; }
+        } else {
+            var c = pal[color];
+            if (eraser) { c = BG; }
+            if (px >= 0) { stroke(px, py, x, y, c); } else { dot(x, y, c); }
+            px = x; py = y; redraw = true;
+        }
+    } else { px = -1; py = -1; }
+    if (redraw) { bar(); flip(); }
+}

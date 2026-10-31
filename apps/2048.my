@@ -1,0 +1,128 @@
+// 2048 - Flechas: mover. R: reiniciar. ESC: salir.
+window(420, 500, "2048");
+var board = array(16, 0);
+var score = 0;
+var best = 0;
+var won = false;
+var over = false;
+var cols = [rgb(205, 193, 180), rgb(238, 228, 218), rgb(237, 224, 200), rgb(242, 177, 121), rgb(245, 149, 99), rgb(246, 124, 95), rgb(246, 94, 59), rgb(237, 207, 114), rgb(237, 204, 97), rgb(237, 200, 80), rgb(237, 197, 63), rgb(237, 194, 46), rgb(60, 58, 50)];
+
+fn add_tile() {
+    var free = [];
+    for (var i = 0; i < 16; i++) { if (board[i] == 0) { push(free, i); } }
+    if (len(free) == 0) { return 0; }
+    var c = free[rand(len(free))];
+    if (rand(10) == 0) { board[c] = 4; } else { board[c] = 2; }
+    return 1;
+}
+
+fn cell_index(n, i, dir) {
+    if (dir == 0) { return n * 4 + i; }
+    if (dir == 1) { return n * 4 + 3 - i; }
+    if (dir == 2) { return i * 4 + n; }
+    return (3 - i) * 4 + n;
+}
+
+fn merge_line(l) {
+    var r = [];
+    for (var i = 0; i < 4; i++) { if (l[i] != 0) { push(r, l[i]); } }
+    var o = [];
+    var j = 0;
+    while (j < len(r)) {
+        if (j + 1 < len(r) && r[j] == r[j + 1]) {
+            push(o, r[j] * 2);
+            score += r[j] * 2;
+            if (r[j] * 2 == 2048) { won = true; }
+            j += 2;
+        } else { push(o, r[j]); j++; }
+    }
+    while (len(o) < 4) { push(o, 0); }
+    return o;
+}
+
+fn move(dir) {
+    var changed = false;
+    for (var n = 0; n < 4; n++) {
+        var l = [];
+        for (var i = 0; i < 4; i++) { push(l, board[cell_index(n, i, dir)]); }
+        var m = merge_line(l);
+        for (var i = 0; i < 4; i++) {
+            if (board[cell_index(n, i, dir)] != m[i]) { changed = true; }
+            board[cell_index(n, i, dir)] = m[i];
+        }
+    }
+    return changed;
+}
+
+fn can_move() {
+    for (var y = 0; y < 4; y++) {
+        for (var x = 0; x < 4; x++) {
+            var v = board[y * 4 + x];
+            if (v == 0) { return true; }
+            if (x < 3 && board[y * 4 + x + 1] == v) { return true; }
+            if (y < 3 && board[(y + 1) * 4 + x] == v) { return true; }
+        }
+    }
+    return false;
+}
+
+fn tile_color(v) {
+    var e = 0;
+    var t = v;
+    while (t > 1) { t = t / 2; e++; }
+    return cols[min(e, 12)];
+}
+
+fn restart() {
+    for (var i = 0; i < 16; i++) { board[i] = 0; }
+    score = 0; won = false; over = false;
+    add_tile(); add_tile();
+}
+
+fn draw() {
+    clear(rgb(250, 248, 239));
+    text(24, 20, "2048", rgb(119, 110, 101));
+    text(240, 12, "PUNTOS " + str(score), rgb(119, 110, 101));
+    text(240, 34, "MEJOR  " + str(best), rgb(119, 110, 101));
+    fill(10, 70, 400, 400, rgb(187, 173, 160));
+    for (var y = 0; y < 4; y++) {
+        for (var x = 0; x < 4; x++) {
+            var v = board[y * 4 + x];
+            var px = 20 + x * 97;
+            var py = 80 + y * 97;
+            fill(px, py, 90, 90, tile_color(v));
+            if (v != 0) {
+                var s = str(v);
+                var tc = rgb(119, 110, 101);
+                if (v > 4) { tc = WHITE; }
+                text(px + 45 - len(s) * 4, py + 37, s, tc);
+            }
+        }
+    }
+    if (won && !over) { text(120, 52, "Llegaste a 2048! Sigue jugando", rgb(237, 150, 30)); }
+    if (over) {
+        fill(10, 70, 400, 400, rgb(238, 228, 218));
+        text(150, 250, "SIN MOVIMIENTOS", rgb(119, 110, 101));
+        text(130, 280, "Pulsa R para reiniciar", rgb(119, 110, 101));
+    }
+    flip();
+}
+
+restart();
+draw();
+while (true) {
+    var k = key(-1);
+    if (k == KEY_ESC) { break; }
+    if (k == 114 || k == 82) { restart(); }
+    var d = -1;
+    if (k == KEY_LEFT) { d = 0; }
+    if (k == KEY_RIGHT) { d = 1; }
+    if (k == KEY_UP) { d = 2; }
+    if (k == KEY_DOWN) { d = 3; }
+    if (d >= 0 && !over) {
+        if (move(d)) { add_tile(); }
+        if (score > best) { best = score; }
+        if (!can_move()) { over = true; }
+    }
+    draw();
+}

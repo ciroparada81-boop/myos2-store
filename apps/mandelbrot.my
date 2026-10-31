@@ -1,0 +1,71 @@
+// MANDELBROT - Click: acercar en ese punto. A: alejar. R: vista inicial. ESC: salir. (Matematica de enteros: sin decimales.)
+var SC = 4096;
+var CELL = 6;
+window(480, 360, "Mandelbrot");
+var GW = 80;
+var GH = 60;
+var cx = -2048;
+var cy = 0;
+var span = 12288;
+var maxit = 40;
+
+fn palette(i) {
+    if (i >= maxit) { return rgb(5, 5, 15); }
+    return rgb((i * 9) % 256, (i * 5 + 30) % 256, 90 + (i * 7) % 166);
+}
+
+fn render() {
+    var step = span / GW;
+    for (var py = 0; py < GH; py++) {
+        var ci = cy + (py - GH / 2) * step;
+        for (var px = 0; px < GW; px++) {
+            var cr = cx + (px - GW / 2) * step;
+            var zr = 0;
+            var zi = 0;
+            var i = 0;
+            while (i < maxit) {
+                var zr2 = zr * zr / SC;
+                var zi2 = zi * zi / SC;
+                if (zr2 + zi2 > 4 * SC) { break; }
+                zi = 2 * zr * zi / SC + ci;
+                zr = zr2 - zi2 + cr;
+                i++;
+            }
+            fill(px * CELL, py * CELL, CELL, CELL, palette(i));
+        }
+        if (py % 4 == 3) {
+            flip();
+            var k = key(0);
+            if (k == KEY_ESC) { return 1; }
+        }
+    }
+    flip();
+    return 0;
+}
+
+fn reset_view() { cx = -2048; cy = 0; span = 12288; }
+
+clear(BLACK);
+text(160, 170, "Calculando...", WHITE);
+flip();
+var quit = render();
+var down = false;
+while (quit == 0) {
+    var k = key(50);
+    if (k == KEY_ESC) { break; }
+    var redo = false;
+    if (k == 114 || k == 82) { reset_view(); redo = true; }
+    if (k == 97 || k == 65) { span = min(24576, span * 2); redo = true; }
+    if (mouseb() == 1) {
+        if (!down) {
+            down = true;
+            var step = span / GW;
+            cx = cx + (mousex() / CELL - GW / 2) * step;
+            cy = cy + (mousey() / CELL - GH / 2) * step;
+            if (span > 400) { span = span / 2; }
+            maxit = min(80, maxit + 6);
+            redo = true;
+        }
+    } else { down = false; }
+    if (redo) { quit = render(); }
+}

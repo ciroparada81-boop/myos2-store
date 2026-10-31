@@ -39,6 +39,29 @@ to the `main` branch.
 
 ## Included programs
 
-- **Hola MyOS** — a simple welcome window.
-- **Paleta** — choose colors with the mouse.
-- **Pong** — a small two-player game controlled with W/S and the arrow keys.
+**Utilities and demos**
+- **Hola MyOS** - a simple welcome window.
+- **Paleta** - choose colors with the mouse.
+- **Pizarra** - free drawing with colors, brush size and eraser.
+- **Cronometro** - stopwatch with laps and big seven-segment digits.
+- **Mandelbrot** - fractal explorer, click to zoom (integer math).
+- **Juego de la vida** - Conway's cellular automaton.
+- **Lluvia digital** - Matrix-style screensaver.
+
+**Games**
+- **Pong** - two players, W/S and the arrow keys.
+- **2048** - slide and merge tiles with the arrow keys.
+- **Buscaminas** - minesweeper (F toggles flag mode).
+- **Tres en raya** - against the PC or a friend.
+- **Memoria** - find the 8 pairs.
+- **Rompeladrillos** - breakout with levels and lives.
+- **Invasores** - space invaders with waves.
+- **Simon** - repeat the growing color sequence.
+
+## MyScript notes for authors
+
+- There are no character literals: `'w'` is a syntax error. Letters arrive from `key()` as ASCII codes (`w` = 119, `W` = 87).
+- Numbers are integers only. `%` exists; there are no shift operators.
+- The mouse position is refreshed inside `key(ms)`, so mouse-driven programs should call `key(20)`-ish in their loop
+  and detect clicks by comparing `mouseb()` with its previous value.
+- Keep sources ASCII-only (the console font is Latin-1, UTF-8 would show up garbled).

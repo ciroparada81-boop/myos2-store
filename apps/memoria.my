@@ -1,0 +1,82 @@
+// MEMORIA - Encuentra las 8 parejas con el mouse. R: reiniciar. ESC: salir.
+window(400, 470, "Memoria");
+var cols = [RED, GREEN, BLUE, YELLOW, ORANGE, PURPLE, CYAN, PINK];
+var letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+var card = array(16, 0);
+var up = array(16, 0);
+var done = array(16, 0);
+var first = -1;
+var second = -1;
+var hide_at = 0;
+var moves = 0;
+var pairs = 0;
+var t0 = 0;
+var tend = 0;
+
+fn shuffle() {
+    for (var i = 0; i < 16; i++) { card[i] = i / 2; up[i] = 0; done[i] = 0; }
+    for (var i = 15; i > 0; i--) {
+        var j = rand(i + 1);
+        var t = card[i];
+        card[i] = card[j];
+        card[j] = t;
+    }
+    first = -1; second = -1; moves = 0; pairs = 0; t0 = 0; tend = 0;
+}
+
+fn draw() {
+    clear(rgb(24, 28, 46));
+    text(16, 12, "Movimientos: " + str(moves), WHITE);
+    var secs = 0;
+    if (t0 > 0) { if (pairs == 8) { secs = (tend - t0) / 1000; } else { secs = (time() - t0) / 1000; } }
+    text(200, 12, "Tiempo: " + str(secs) + "s", WHITE);
+    for (var i = 0; i < 16; i++) {
+        var x = 16 + (i % 4) * 94;
+        var y = 44 + (i / 4) * 94;
+        if (up[i] == 1 || done[i] == 1) {
+            fill(x, y, 86, 86, cols[card[i]]);
+            text(x + 39, y + 35, letters[card[i]], BLACK);
+        } else {
+            fill(x, y, 86, 86, rgb(70, 82, 130));
+            fill(x + 6, y + 6, 74, 74, rgb(54, 64, 108));
+        }
+    }
+    if (pairs == 8) { text(70, 440, "Ganaste! R: jugar de nuevo", rgb(110, 255, 150)); }
+    flip();
+}
+
+shuffle();
+var down = false;
+while (true) {
+    var k = key(30);
+    if (k == KEY_ESC) { break; }
+    if (k == 114 || k == 82) { shuffle(); }
+    if (second >= 0 && time() >= hide_at) {
+        up[first] = 0; up[second] = 0; first = -1; second = -1;
+    }
+    if (mouseb() == 1) {
+        if (!down) {
+            down = true;
+            var gx = (mousex() - 16) / 94;
+            var gy = (mousey() - 44) / 94;
+            if (mousex() >= 16 && mousey() >= 44 && gx < 4 && gy < 4 && second < 0) {
+                var c = gy * 4 + gx;
+                if (up[c] == 0 && done[c] == 0) {
+                    if (t0 == 0) { t0 = time(); }
+                    up[c] = 1;
+                    if (first < 0) { first = c; }
+                    else {
+                        second = c;
+                        moves++;
+                        if (card[first] == card[second]) {
+                            done[first] = 1; done[second] = 1; up[first] = 0; up[second] = 0;
+                            first = -1; second = -1; pairs++;
+                            if (pairs == 8) { tend = time(); }
+                        } else { hide_at = time() + 800; }
+                    }
+                }
+            }
+        }
+    } else { down = false; }
+    draw();
+}

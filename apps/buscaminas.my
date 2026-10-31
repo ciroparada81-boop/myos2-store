@@ -1,0 +1,137 @@
+// BUSCAMINAS - Click: descubrir. F: cambia entre descubrir y bandera. R: reiniciar. ESC: salir.
+var CW = 32;
+var GW = 12;
+var GH = 10;
+var MINES = 16;
+window(GW * CW, GH * CW + 44, "Buscaminas");
+var mine = array(GW * GH, 0);
+var cnt = array(GW * GH, 0);
+var opened = array(GW * GH, 0);
+var flag = array(GW * GH, 0);
+var started = false;
+var dead = false;
+var win = false;
+var nopen = 0;
+var flag_mode = false;
+var t0 = 0;
+var tfin = 0;
+var ncol = [BLACK, rgb(40, 90, 230), rgb(30, 150, 60), rgb(220, 50, 50), rgb(20, 30, 140), rgb(150, 30, 30), rgb(20, 140, 140), BLACK, GRAY];
+
+fn restart() {
+    for (var i = 0; i < GW * GH; i++) { mine[i] = 0; cnt[i] = 0; opened[i] = 0; flag[i] = 0; }
+    started = false; dead = false; win = false; nopen = 0;
+}
+
+fn place_mines(safe) {
+    var placed = 0;
+    while (placed < MINES) {
+        var c = rand(GW * GH);
+        var cx = c % GW;
+        var cy = c / GW;
+        var sx = safe % GW;
+        var sy = safe / GW;
+        if (mine[c] == 0 && !(abs(cx - sx) <= 1 && abs(cy - sy) <= 1)) { mine[c] = 1; placed++; }
+    }
+    for (var y = 0; y < GH; y++) {
+        for (var x = 0; x < GW; x++) {
+            var n = 0;
+            for (var dy = -1; dy <= 1; dy++) {
+                for (var dx = -1; dx <= 1; dx++) {
+                    var nx = x + dx;
+                    var ny = y + dy;
+                    if (nx >= 0 && nx < GW && ny >= 0 && ny < GH && mine[ny * GW + nx] == 1) { n++; }
+                }
+            }
+            cnt[y * GW + x] = n;
+        }
+    }
+}
+
+fn reveal(start) {
+    var stack = [start];
+    while (len(stack) > 0) {
+        var c = pop(stack);
+        if (opened[c] == 1 || flag[c] == 1) { continue; }
+        opened[c] = 1; nopen++;
+        if (cnt[c] == 0) {
+            var x = c % GW;
+            var y = c / GW;
+            for (var dy = -1; dy <= 1; dy++) {
+                for (var dx = -1; dx <= 1; dx++) {
+                    var nx = x + dx;
+                    var ny = y + dy;
+                    if (nx >= 0 && nx < GW && ny >= 0 && ny < GH && opened[ny * GW + nx] == 0) { push(stack, ny * GW + nx); }
+                }
+            }
+        }
+    }
+}
+
+fn click(c) {
+    if (dead || win) { return 0; }
+    if (flag_mode) {
+        if (opened[c] == 0) { flag[c] = 1 - flag[c]; }
+        return 0;
+    }
+    if (flag[c] == 1 || opened[c] == 1) { return 0; }
+    if (!started) { place_mines(c); started = true; t0 = time(); }
+    if (mine[c] == 1) { dead = true; tfin = time(); opened[c] = 1; return 0; }
+    reveal(c);
+    if (nopen == GW * GH - MINES) { win = true; tfin = time(); }
+}
+
+fn draw() {
+    clear(rgb(30, 34, 50));
+    var flags = 0;
+    for (var y = 0; y < GH; y++) {
+        for (var x = 0; x < GW; x++) {
+            var c = y * GW + x;
+            var px = x * CW;
+            var py = y * CW + 44;
+            if (flag[c] == 1) { flags++; }
+            if (opened[c] == 1 || (dead && mine[c] == 1)) {
+                if (mine[c] == 1) {
+                    fill(px + 1, py + 1, CW - 2, CW - 2, rgb(150, 60, 60));
+                    circle(px + 16, py + 16, 7, BLACK);
+                } else {
+                    fill(px + 1, py + 1, CW - 2, CW - 2, rgb(205, 210, 225));
+                    if (cnt[c] > 0) { text(px + 12, py + 8, str(cnt[c]), ncol[cnt[c]]); }
+                }
+            } else {
+                fill(px + 1, py + 1, CW - 2, CW - 2, rgb(110, 125, 175));
+                if (flag[c] == 1) {
+                    fill(px + 14, py + 7, 3, 17, WHITE);
+                    fill(px + 17, py + 7, 10, 7, RED);
+                }
+            }
+        }
+    }
+    var secs = 0;
+    if (started) {
+        if (dead || win) { secs = (tfin - t0) / 1000; } else { secs = (time() - t0) / 1000; }
+    }
+    text(10, 6, "Minas: " + str(MINES - flags), WHITE);
+    text(130, 6, "Tiempo: " + str(secs), WHITE);
+    if (flag_mode) { text(10, 26, "Modo: BANDERA (F)", YELLOW); } else { text(10, 26, "Modo: descubrir (F)", GRAY); }
+    if (dead) { text(250, 16, "BOOM! R: reiniciar", rgb(255, 110, 110)); }
+    if (win) { text(250, 16, "GANASTE! R: reiniciar", rgb(110, 255, 150)); }
+    flip();
+}
+
+restart();
+var down = false;
+while (true) {
+    var k = key(30);
+    if (k == KEY_ESC) { break; }
+    if (k == 114 || k == 82) { restart(); }
+    if (k == 102 || k == 70) { flag_mode = !flag_mode; }
+    if (mouseb() == 1) {
+        if (!down) {
+            down = true;
+            var gx = mousex() / CW;
+            var gy = (mousey() - 44) / CW;
+            if (mousey() >= 44 && gx >= 0 && gx < GW && gy >= 0 && gy < GH) { click(gy * GW + gx); }
+        }
+    } else { down = false; }
+    draw();
+}

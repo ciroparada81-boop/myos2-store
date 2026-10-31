@@ -1,0 +1,133 @@
+// TRES EN RAYA - Click en una casilla. 2: cambia entre jugar contra la PC o contra otra persona. R: reiniciar. ESC: salir.
+window(360, 440, "Tres en raya");
+var b = array(9, 0);
+var turn = 1;
+var done = false;
+var winner = 0;
+var vs_pc = true;
+var wx = 0;
+var wo = 0;
+var dr = 0;
+var lines = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+var wline = -1;
+
+fn check() {
+    for (var i = 0; i < 8; i++) {
+        var a = b[lines[i][0]];
+        if (a != 0 && a == b[lines[i][1]] && a == b[lines[i][2]]) { wline = i; return a; }
+    }
+    var full = true;
+    for (var i = 0; i < 9; i++) { if (b[i] == 0) { full = false; } }
+    if (full) { return 3; }
+    return 0;
+}
+
+fn finish() {
+    winner = check();
+    if (winner == 1) { wx++; done = true; }
+    if (winner == 2) { wo++; done = true; }
+    if (winner == 3) { dr++; done = true; }
+}
+
+fn find_win(p) {
+    for (var i = 0; i < 8; i++) {
+        var n = 0;
+        var empty = -1;
+        for (var j = 0; j < 3; j++) {
+            var c = lines[i][j];
+            if (b[c] == p) { n++; }
+            if (b[c] == 0) { empty = c; }
+        }
+        if (n == 2 && empty >= 0) { return empty; }
+    }
+    return -1;
+}
+
+fn pc_move() {
+    var c = find_win(2);
+    if (c < 0) { c = find_win(1); }
+    if (c < 0 && b[4] == 0) { c = 4; }
+    if (c < 0) {
+        var corners = [0, 2, 6, 8];
+        var free = [];
+        for (var i = 0; i < 4; i++) { if (b[corners[i]] == 0) { push(free, corners[i]); } }
+        if (len(free) > 0) { c = free[rand(len(free))]; }
+    }
+    if (c < 0) {
+        var free2 = [];
+        for (var i = 0; i < 9; i++) { if (b[i] == 0) { push(free2, i); } }
+        c = free2[rand(len(free2))];
+    }
+    b[c] = 2;
+    turn = 1;
+    finish();
+}
+
+fn restart() {
+    for (var i = 0; i < 9; i++) { b[i] = 0; }
+    turn = 1; done = false; winner = 0; wline = -1;
+}
+
+fn draw() {
+    clear(rgb(22, 26, 44));
+    text(16, 14, "X: " + str(wx) + "   O: " + str(wo) + "   Empates: " + str(dr), WHITE);
+    if (vs_pc) { text(16, 34, "Contra la PC (2 cambia)", GRAY); } else { text(16, 34, "Dos jugadores (2 cambia)", GRAY); }
+    for (var i = 1; i < 3; i++) {
+        fill(20 + i * 107 - 2, 60, 4, 320, rgb(70, 80, 120));
+        fill(20, 60 + i * 107 - 2, 320, 4, rgb(70, 80, 120));
+    }
+    for (var i = 0; i < 9; i++) {
+        var cx = 20 + (i % 3) * 107 + 53;
+        var cy = 60 + (i / 3) * 107 + 53;
+        if (b[i] == 1) {
+            line(cx - 30, cy - 30, cx + 30, cy + 30, rgb(110, 200, 255));
+            line(cx - 30, cy + 30, cx + 30, cy - 30, rgb(110, 200, 255));
+            line(cx - 31, cy - 30, cx + 29, cy + 30, rgb(110, 200, 255));
+            line(cx - 31, cy + 30, cx + 29, cy - 30, rgb(110, 200, 255));
+        }
+        if (b[i] == 2) {
+            circle(cx, cy, 32, rgb(255, 130, 170));
+            circle(cx, cy, 26, rgb(22, 26, 44));
+        }
+    }
+    if (wline >= 0) {
+        var a = lines[wline][0];
+        var c = lines[wline][2];
+        line(20 + (a % 3) * 107 + 53, 60 + (a / 3) * 107 + 53, 20 + (c % 3) * 107 + 53, 60 + (c / 3) * 107 + 53, YELLOW);
+        line(21 + (a % 3) * 107 + 53, 60 + (a / 3) * 107 + 53, 21 + (c % 3) * 107 + 53, 60 + (c / 3) * 107 + 53, YELLOW);
+    }
+    if (done) {
+        if (winner == 3) { text(100, 400, "Empate. R: otra partida", WHITE); }
+        else if (winner == 1) { text(90, 400, "Gana X! R: otra partida", rgb(110, 200, 255)); }
+        else { text(90, 400, "Gana O! R: otra partida", rgb(255, 130, 170)); }
+    } else {
+        if (turn == 1) { text(130, 400, "Turno de X", rgb(110, 200, 255)); } else { text(130, 400, "Turno de O", rgb(255, 130, 170)); }
+    }
+    flip();
+}
+
+var down = false;
+draw();
+while (true) {
+    var k = key(30);
+    if (k == KEY_ESC) { break; }
+    if (k == 114 || k == 82) { restart(); }
+    if (k == 50) { vs_pc = !vs_pc; restart(); }
+    if (mouseb() == 1) {
+        if (!down) {
+            down = true;
+            var gx = (mousex() - 20) / 107;
+            var gy = (mousey() - 60) / 107;
+            if (mousex() >= 20 && mousey() >= 60 && gx < 3 && gy < 3 && !done) {
+                var c = gy * 3 + gx;
+                if (b[c] == 0) {
+                    b[c] = turn;
+                    if (turn == 1) { turn = 2; } else { turn = 1; }
+                    finish();
+                    if (!done && vs_pc && turn == 2) { pc_move(); }
+                }
+            }
+        }
+    } else { down = false; }
+    draw();
+}

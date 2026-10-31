@@ -1,0 +1,86 @@
+// SIMON - Repite la secuencia. Click en los colores o teclas 1 2 3 4. ESC: salir.
+window(360, 420, "Simon");
+var cols = [rgb(60, 200, 90), rgb(235, 70, 70), rgb(240, 210, 60), rgb(70, 130, 240)];
+var dim = [rgb(20, 70, 32), rgb(80, 24, 24), rgb(84, 74, 20), rgb(24, 44, 84)];
+var seq = [];
+var best = 0;
+var msg = "Pulsa Espacio o click para empezar";
+var lit = -1;
+
+fn draw() {
+    clear(rgb(18, 20, 34));
+    for (var i = 0; i < 4; i++) {
+        var x = 20 + (i % 2) * 160;
+        var y = 60 + (i / 2) * 160;
+        if (lit == i) { fill(x, y, 150, 150, cols[i]); } else { fill(x, y, 150, 150, dim[i]); }
+        text(x + 71, y + 67, str(i + 1), WHITE);
+    }
+    text(16, 14, "Ronda: " + str(len(seq)) + "   Mejor: " + str(best), WHITE);
+    text(16, 36, msg, GRAY);
+    flip();
+}
+
+fn flash(i) {
+    lit = i; draw(); sleep(380);
+    lit = -1; draw(); sleep(160);
+}
+
+fn play_seq() {
+    msg = "Mira...";
+    draw(); sleep(500);
+    for (var i = 0; i < len(seq); i++) { flash(seq[i]); }
+    msg = "Tu turno";
+    draw();
+}
+
+fn read_pad() {
+    var down = false;
+    while (true) {
+        var k = key(30);
+        if (k == KEY_ESC) { return -2; }
+        if (k >= 49 && k <= 52) { return k - 49; }
+        if (mouseb() == 1) {
+            if (!down) {
+                down = true;
+                var gx = (mousex() - 20) / 160;
+                var gy = (mousey() - 60) / 160;
+                if (mousex() >= 20 && mousey() >= 60 && gx < 2 && gy < 2 && (mousex() - 20) % 160 < 150 && (mousey() - 60) % 160 < 150) { return gy * 2 + gx; }
+            }
+        } else { down = false; }
+    }
+}
+
+draw();
+var quit = false;
+var waiting = true;
+while (waiting) {
+    var k = key(30);
+    if (k == KEY_ESC) { quit = true; waiting = false; }
+    if (k == KEY_SPACE || mouseb() == 1) { waiting = false; }
+}
+while (!quit) {
+    push(seq, rand(4));
+    play_seq();
+    var ok = true;
+    for (var i = 0; i < len(seq) && ok && !quit; i++) {
+        var p = read_pad();
+        if (p == -2) { quit = true; }
+        else {
+            flash(p);
+            if (p != seq[i]) { ok = false; }
+        }
+    }
+    if (!quit && !ok) {
+        best = max(best, len(seq) - 1);
+        msg = "Fallaste! Llegaste a la ronda " + str(len(seq) - 1) + ". Espacio: otra vez";
+        seq = [];
+        draw();
+        var w = true;
+        while (w) {
+            var k = key(30);
+            if (k == KEY_ESC) { quit = true; w = false; }
+            if (k == KEY_SPACE) { w = false; }
+        }
+    }
+    if (!quit && ok) { msg = "Bien!"; draw(); sleep(300); }
+}

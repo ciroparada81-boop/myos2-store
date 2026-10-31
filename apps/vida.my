@@ -1,0 +1,82 @@
+// JUEGO DE LA VIDA - Mouse: dibujar celulas. Espacio: pausa/seguir. R: azar. C: borrar. G: planeador. +/-: velocidad. ESC: salir.
+var GW = 60;
+var GH = 40;
+var CS = 8;
+window(GW * CS, GH * CS + 24, "Juego de la vida");
+var cur = array(GW * GH, 0);
+var nxt = array(GW * GH, 0);
+var running = false;
+var gen = 0;
+var delay = 120;
+var last = 0;
+
+fn clear_all() { for (var i = 0; i < GW * GH; i++) { cur[i] = 0; } gen = 0; }
+
+fn randomize() {
+    for (var i = 0; i < GW * GH; i++) { if (rand(4) == 0) { cur[i] = 1; } else { cur[i] = 0; } }
+    gen = 0;
+}
+
+fn glider() {
+    var x = rand(GW - 6) + 2;
+    var y = rand(GH - 6) + 2;
+    cur[y * GW + x + 1] = 1;
+    cur[(y + 1) * GW + x + 2] = 1;
+    cur[(y + 2) * GW + x] = 1;
+    cur[(y + 2) * GW + x + 1] = 1;
+    cur[(y + 2) * GW + x + 2] = 1;
+}
+
+fn step() {
+    for (var y = 0; y < GH; y++) {
+        var ya = ((y + GH - 1) % GH) * GW;
+        var yb = y * GW;
+        var yc = ((y + 1) % GH) * GW;
+        for (var x = 0; x < GW; x++) {
+            var xa = (x + GW - 1) % GW;
+            var xc = (x + 1) % GW;
+            var n = cur[ya + xa] + cur[ya + x] + cur[ya + xc] + cur[yb + xa] + cur[yb + xc] + cur[yc + xa] + cur[yc + x] + cur[yc + xc];
+            var alive = cur[yb + x];
+            if (alive == 1 && (n == 2 || n == 3)) { nxt[yb + x] = 1; }
+            else if (alive == 0 && n == 3) { nxt[yb + x] = 1; }
+            else { nxt[yb + x] = 0; }
+        }
+    }
+    var t = cur; cur = nxt; nxt = t;
+    gen++;
+}
+
+fn draw() {
+    clear(rgb(14, 18, 30));
+    var pop = 0;
+    for (var y = 0; y < GH; y++) {
+        for (var x = 0; x < GW; x++) {
+            if (cur[y * GW + x] == 1) { pop++; fill(x * CS, y * CS + 24, CS - 1, CS - 1, rgb(110, 240, 160)); }
+        }
+    }
+    fill(0, 0, GW * CS, 22, rgb(24, 30, 50));
+    var estado = "PAUSA";
+    if (running) { estado = "CORRIENDO"; }
+    text(8, 3, estado + "   Gen: " + str(gen) + "   Vivas: " + str(pop) + "   Vel: " + str(delay) + "ms", WHITE);
+    flip();
+}
+
+randomize();
+var dirty = true;
+while (true) {
+    var k = key(20);
+    if (k == KEY_ESC) { break; }
+    if (k == KEY_SPACE) { running = !running; dirty = true; }
+    if (k == 114 || k == 82) { randomize(); dirty = true; }
+    if (k == 99 || k == 67) { clear_all(); running = false; dirty = true; }
+    if (k == 103 || k == 71) { glider(); dirty = true; }
+    if (k == 43) { delay = max(20, delay - 20); dirty = true; }
+    if (k == 45) { delay = min(600, delay + 20); dirty = true; }
+    if (mouseb() == 1 && mousey() >= 24) {
+        var gx = mousex() / CS;
+        var gy = (mousey() - 24) / CS;
+        if (gx >= 0 && gx < GW && gy >= 0 && gy < GH && cur[gy * GW + gx] == 0) { cur[gy * GW + gx] = 1; dirty = true; }
+    }
+    if (running && time() - last >= delay) { step(); last = time(); dirty = true; }
+    if (dirty) { draw(); dirty = false; }
+}

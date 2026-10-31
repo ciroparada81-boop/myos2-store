@@ -1,0 +1,87 @@
+// ROMPELADRILLOS - Mouse o flechas: mover la barra. Espacio o click: lanzar la bola. ESC: salir.
+window(480, 420, "Rompeladrillos");
+var W = width();
+var H = height();
+var rowcol = [RED, ORANGE, YELLOW, GREEN, BLUE];
+var bricks = array(50, 1);
+var alive = 50;
+var px = W / 2;
+var pw = 70;
+var bx = 0;
+var by = 0;
+var vx = 0;
+var vy = 0;
+var launched = false;
+var lives = 3;
+var score = 0;
+var level = 1;
+var over = false;
+var lastm = -1;
+
+fn new_level() {
+    for (var i = 0; i < 50; i++) { bricks[i] = 1; }
+    alive = 50;
+    launched = false;
+}
+
+fn restart() {
+    lives = 3; score = 0; level = 1; over = false; new_level();
+}
+
+fn draw() {
+    clear(rgb(14, 17, 30));
+    for (var r = 0; r < 5; r++) {
+        for (var c = 0; c < 10; c++) {
+            if (bricks[r * 10 + c] == 1) { fill(10 + c * 46, 40 + r * 18, 44, 16, rowcol[r]); }
+        }
+    }
+    fill(px - pw / 2, H - 28, pw, 10, rgb(120, 220, 255));
+    if (!launched) { bx = px; by = H - 36; }
+    circle(bx, by, 5, WHITE);
+    text(10, 8, "Puntos: " + str(score), WHITE);
+    text(200, 8, "Nivel " + str(level), GRAY);
+    text(390, 8, "Vidas: " + str(lives), WHITE);
+    if (!launched && !over) { text(120, H - 70, "Espacio o click para lanzar", GRAY); }
+    if (over) { text(150, H / 2, "GAME OVER - R: reiniciar", rgb(255, 100, 100)); }
+    flip();
+}
+
+restart();
+while (true) {
+    var k = key(16);
+    if (k == KEY_ESC) { break; }
+    if (k == 114 || k == 82) { restart(); }
+    if (k == KEY_LEFT) { px -= 28; }
+    if (k == KEY_RIGHT) { px += 28; }
+    if (mousex() != lastm) { lastm = mousex(); px = lastm; }
+    px = max(pw / 2, min(W - pw / 2, px));
+    if (!over && !launched && (k == KEY_SPACE || mouseb() == 1)) {
+        launched = true; vx = 3 + level / 2; vy = -4 - level / 2;
+        if (rand(2) == 0) { vx = -vx; }
+    }
+    if (launched && !over) {
+        bx += vx; by += vy;
+        if (bx < 5) { bx = 5; vx = -vx; }
+        if (bx > W - 5) { bx = W - 5; vx = -vx; }
+        if (by < 5) { by = 5; vy = -vy; }
+        if (vy > 0 && by >= H - 33 && by <= H - 18 && abs(bx - px) <= pw / 2 + 4) {
+            vy = -abs(vy);
+            vx = (bx - px) / 6;
+            if (vx == 0) { vx = 1; }
+            by = H - 34;
+        }
+        var c = (bx - 10) / 46;
+        var r = (by - 40) / 18;
+        if (bx >= 10 && by >= 40 && c < 10 && r < 5) {
+            if (bricks[r * 10 + c] == 1) {
+                bricks[r * 10 + c] = 0; alive--; score += 10 * (5 - r); vy = -vy;
+            }
+        }
+        if (by > H) {
+            lives--; launched = false;
+            if (lives <= 0) { over = true; }
+        }
+        if (alive == 0) { level++; new_level(); }
+    }
+    draw();
+}

@@ -1,4 +1,16 @@
 # MyOS Store catalog: id|name|version|description|direct-https-url|sha256
 hola|Hola MyOS|1.0|Una ventana sencilla de bienvenida.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/hola.my|bb650ab90bfa714714203fe90f7f07a8fb76d94d73e5bb304cd91a410564f156
 paleta|Paleta|1.0|Elige un color con el mouse.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/paleta.my|790588f2e6051ca898b4869a195997164bb4996322239a0eb3a61fe1250aa10b
-pong|Pong|1.0|Juego para dos personas con teclado.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/pong.my|65d01f533cd5597f1509710d9d6e7adeea5ca32bca0dc75891931fe3fc42ac55
+pong|Pong|1.1|Juego para dos personas con teclado (W/S y flechas).|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/pong.my|855966edcfb5e34f9e4203d105843b8033ff02cdfec9f7ce8241406e7a723630
+2048|2048|1.0|Une las fichas con las flechas hasta llegar a 2048.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/2048.my|55366ad6fdfb8bfe3b07efa9b92c046574a187eb7b4bc8014238d83fcf6247a9
+buscaminas|Buscaminas|1.0|Descubre el tablero sin pisar ninguna mina.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/buscaminas.my|b8c3bf95db92e742e9b4bb333b230bb5641ec64bee0767877ab23af2cc73ebd6
+tresenraya|Tres en raya|1.0|Contra la PC o contra otra persona.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/tresenraya.my|7d1249fec38a8c0e4a7616c2931639f53cbcce8ecfa5e4543b5cca0923a26b10
+memoria|Memoria|1.0|Encuentra las 8 parejas de cartas.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/memoria.my|488969f34f5cc7b50d6991a3a323cb3dfa464804b1325f1d84b1c7afa68d34d4
+rompeladrillos|Rompeladrillos|1.0|Rompe todos los ladrillos con la bola y la barra.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/rompeladrillos.my|ce45dfd9515691f7273755fff207a6f197eefcf2c7d55bc4f27372346ce40e51
+invasores|Invasores|1.0|Defiende la Tierra de las oleadas alienigenas.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/invasores.my|3ddadfe4b75982e9eb8badf65a0e509f7eb0b6f8b411aa59cd307af2c3d889a6
+simon|Simon|1.0|Repite la secuencia de colores cada vez mas larga.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/simon.my|17cd10d950c3f04414679c8ba1ec48c94f061e973fd7f41423be30d25d9a8e82
+vida|Juego de la vida|1.0|Simulacion de celulas de Conway: dibuja y mira evolucionar.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/vida.my|0ef126d547a120e9d6010e1aa000d936d47588976bdbb262294a99d47242134f
+mandelbrot|Mandelbrot|1.0|Explora el fractal haciendo zoom con el mouse.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/mandelbrot.my|66c82f0408b33cf9c2aa2602780485e0e9e216e348446dab4f2ff0f47027c788
+cronometro|Cronometro|1.0|Cronometro con vueltas y digitos grandes.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/cronometro.my|ecc1cd0b26be7bdb7bc5b5d299fa87474309a4baf1a7682efe1f056247c72c6e
+lluvia|Lluvia digital|1.0|Protector de pantalla estilo Matrix.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/lluvia.my|94ff021397e1f0e35994328d95ab261acdd9032c04e332da7d1b7b220c8c2594
+pizarra|Pizarra|1.0|Dibuja libremente con colores, grosor y goma.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/pizarra.my|35e63c4464cb5114d9d029fa03c266626c8eca44cc9b83814c59c75e057db0e9

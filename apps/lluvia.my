@@ -1,0 +1,45 @@
+// LLUVIA DIGITAL - Protector de pantalla estilo Matrix. + / -: velocidad. ESC: salir.
+window(480, 320, "Lluvia digital");
+var CW = 8;
+var CH = 16;
+var COLS = width() / CW;
+var ROWS = height() / CH;
+var head = array(COLS, 0);
+var spd = array(COLS, 1);
+var tail = array(COLS, 8);
+var delay = 60;
+for (var c = 0; c < COLS; c++) {
+    head[c] = 0 - rand(ROWS * 2);
+    spd[c] = 1 + rand(2);
+    tail[c] = 5 + rand(10);
+}
+var grid = array(COLS * ROWS, 33);
+for (var i = 0; i < COLS * ROWS; i++) { grid[i] = 33 + rand(90); }
+
+while (true) {
+    var k = key(delay);
+    if (k == KEY_ESC) { break; }
+    if (k == 43) { delay = max(15, delay - 15); }
+    if (k == 45) { delay = min(200, delay + 15); }
+    clear(rgb(0, 6, 2));
+    for (var c = 0; c < COLS; c++) {
+        head[c] += spd[c];
+        if (head[c] - tail[c] > ROWS) {
+            head[c] = 0 - rand(10);
+            spd[c] = 1 + rand(2);
+            tail[c] = 5 + rand(10);
+        }
+        for (var t = 0; t < tail[c]; t++) {
+            var r = head[c] - t;
+            if (r >= 0 && r < ROWS) {
+                var idx = r * COLS + c;
+                if (rand(8) == 0) { grid[idx] = 33 + rand(90); }
+                var g = 255 - t * (230 / tail[c]);
+                var col = rgb(0, g, g / 5);
+                if (t == 0) { col = rgb(200, 255, 210); }
+                text(c * CW, r * CH, chr(grid[idx]), col);
+            }
+        }
+    }
+    flip();
+}

@@ -1,0 +1,114 @@
+// INVASORES - Flechas izquierda/derecha: mover. Espacio: disparar. R: reiniciar. ESC: salir.
+window(480, 460, "Invasores");
+var W = width();
+var H = height();
+var px = W / 2;
+var shot_x = 0;
+var shot_y = -1;
+var al = array(32, 1);
+var ax = 20;
+var ay = 50;
+var adir = 1;
+var ashots = [];
+var lives = 3;
+var score = 0;
+var level = 1;
+var over = false;
+var tick = 0;
+var hit_flash = 0;
+var rowcol = [rgb(255, 110, 150), rgb(255, 170, 80), rgb(120, 220, 140), rgb(110, 190, 255)];
+
+fn new_wave() {
+    for (var i = 0; i < 32; i++) { al[i] = 1; }
+    ax = 20; ay = 50; adir = 1; ashots = []; shot_y = -1;
+}
+
+fn restart() { lives = 3; score = 0; level = 1; over = false; new_wave(); }
+
+fn count_alive() {
+    var n = 0;
+    for (var i = 0; i < 32; i++) { n += al[i]; }
+    return n;
+}
+
+fn draw() {
+    clear(rgb(8, 10, 22));
+    for (var i = 0; i < 32; i++) {
+        if (al[i] == 1) {
+            var x = ax + (i % 8) * 48;
+            var y = ay + (i / 8) * 34;
+            var c = rowcol[i / 8];
+            fill(x + 4, y + 4, 28, 14, c);
+            fill(x, y + 10, 36, 6, c);
+            fill(x + 8, y + 18, 5, 6, c);
+            fill(x + 23, y + 18, 5, 6, c);
+            fill(x + 9, y + 8, 4, 4, BLACK);
+            fill(x + 23, y + 8, 4, 4, BLACK);
+        }
+    }
+    var pc = rgb(120, 240, 160);
+    if (hit_flash > 0) { pc = RED; hit_flash--; }
+    fill(px - 16, H - 30, 32, 10, pc);
+    fill(px - 3, H - 38, 6, 8, pc);
+    if (shot_y >= 0) { fill(shot_x - 1, shot_y, 3, 10, WHITE); }
+    for (var i = 0; i < len(ashots); i += 2) { fill(ashots[i] - 1, ashots[i + 1], 3, 10, YELLOW); }
+    text(10, 8, "Puntos: " + str(score), WHITE);
+    text(200, 8, "Oleada " + str(level), GRAY);
+    text(390, 8, "Vidas: " + str(lives), WHITE);
+    if (over) { text(130, H / 2, "GAME OVER - R: reiniciar", rgb(255, 100, 100)); }
+    flip();
+}
+
+restart();
+while (true) {
+    var k = key(30);
+    if (k == KEY_ESC) { break; }
+    if (k == 114 || k == 82) { restart(); }
+    if (!over) {
+        if (k == KEY_LEFT) { px -= 16; }
+        if (k == KEY_RIGHT) { px += 16; }
+        px = max(20, min(W - 20, px));
+        if (k == KEY_SPACE && shot_y < 0) { shot_x = px; shot_y = H - 44; }
+        tick++;
+        if (shot_y >= 0) {
+            shot_y -= 12;
+            var col = (shot_x - ax) / 48;
+            var row = (shot_y - ay) / 34;
+            if (shot_x >= ax && shot_y >= ay && col < 8 && row < 4) {
+                if (al[row * 8 + col] == 1 && (shot_x - ax) % 48 < 36) {
+                    al[row * 8 + col] = 0; shot_y = -1; score += 10 * (4 - row);
+                }
+            }
+        }
+        var every = max(4, 14 - level * 2 - (32 - count_alive()) / 4);
+        if (tick % every == 0) {
+            ax += adir * 8;
+            var minx = 9999;
+            var maxx = -1;
+            for (var i = 0; i < 32; i++) {
+                if (al[i] == 1) { minx = min(minx, ax + (i % 8) * 48); maxx = max(maxx, ax + (i % 8) * 48 + 36); }
+            }
+            if (maxx > W - 6 || (minx < 6 && minx != 9999)) { adir = -adir; ax += adir * 8; ay += 14; }
+        }
+        if (rand(max(8, 40 - level * 4)) == 0 && count_alive() > 0) {
+            var c = rand(8);
+            var found = -1;
+            for (var r = 3; r >= 0; r--) { if (found < 0 && al[r * 8 + c] == 1) { found = r; } }
+            if (found >= 0) { push(ashots, ax + c * 48 + 18); push(ashots, ay + found * 34 + 24); }
+        }
+        var keep = [];
+        for (var i = 0; i < len(ashots); i += 2) {
+            var sx = ashots[i];
+            var sy = ashots[i + 1] + 6;
+            if (sy > H - 40 && sy < H - 20 && abs(sx - px) < 18) { lives--; hit_flash = 8; }
+            else if (sy < H) { push(keep, sx); push(keep, sy); }
+        }
+        ashots = keep;
+        if (lives <= 0) { over = true; }
+        var low = -1;
+        for (var i = 0; i < 32; i++) { if (al[i] == 1) { low = max(low, ay + (i / 8) * 34 + 24); } }
+        if (low >= H - 40) { over = true; }
+        if (count_alive() == 0) { level++; new_wave(); }
+    }
+    draw();
+}

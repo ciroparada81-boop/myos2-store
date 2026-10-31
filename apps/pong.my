@@ -34,8 +34,8 @@ reset(1);
 while (true) {
     var k = key(20);
     if (k == KEY_ESC) { break; }
-    if (k == 'w' || k == 'W') { py -= 22; }
-    if (k == 's' || k == 'S') { py += 22; }
+    if (k == 119 || k == 87) { py -= 22; }
+    if (k == 115 || k == 83) { py += 22; }
     if (k == KEY_UP) { ay -= 22; }
     if (k == KEY_DOWN) { ay += 22; }
     py = max(38, min(H - 38, py));
