@@ -1,0 +1,52 @@
+window(520, 360, "Pong");
+var W = width();
+var H = height();
+var py = H / 2;
+var ay = H / 2;
+var bx = W / 2;
+var by = H / 2;
+var vx = 4;
+var vy = 3;
+var left_score = 0;
+var right_score = 0;
+
+fn reset(dir) {
+    bx = W / 2;
+    by = H / 2;
+    vx = 4 * dir;
+    vy = rand(5) - 2;
+    if (vy == 0) { vy = 2; }
+}
+
+fn draw() {
+    clear(rgb(14, 17, 30));
+    for (var y = 8; y < H; y += 24) { fill(W / 2 - 2, y, 4, 12, rgb(60, 66, 100)); }
+    fill(18, py - 38, 9, 76, rgb(120, 220, 255));
+    fill(W - 27, ay - 38, 9, 76, rgb(255, 130, 170));
+    circle(bx, by, 8, WHITE);
+    text(W / 2 - 34, 12, str(left_score) + " : " + str(right_score), WHITE);
+    text(16, H - 24, "W/S: izquierda", rgb(120, 220, 255));
+    text(W - 148, H - 24, "Flechas: derecha", rgb(255, 130, 170));
+    flip();
+}
+
+reset(1);
+while (true) {
+    var k = key(20);
+    if (k == KEY_ESC) { break; }
+    if (k == 'w' || k == 'W') { py -= 22; }
+    if (k == 's' || k == 'S') { py += 22; }
+    if (k == KEY_UP) { ay -= 22; }
+    if (k == KEY_DOWN) { ay += 22; }
+    py = max(38, min(H - 38, py));
+    ay = max(38, min(H - 38, ay));
+    bx += vx;
+    by += vy;
+    if (by < 8) { by = 8; vy = -vy; }
+    if (by > H - 8) { by = H - 8; vy = -vy; }
+    if (vx < 0 && bx < 36 && bx > 18 && abs(by - py) < 46) { vx = -vx; vy = (by - py) / 7; bx = 37; }
+    if (vx > 0 && bx > W - 36 && bx < W - 18 && abs(by - ay) < 46) { vx = -vx; vy = (by - ay) / 7; bx = W - 37; }
+    if (bx < 0) { right_score++; reset(1); }
+    if (bx > W) { left_score++; reset(-1); }
+    draw();
+}

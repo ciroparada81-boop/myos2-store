@@ -1,0 +1,4 @@
+# MyOS Store catalog: id|name|version|description|direct-https-url|sha256
+hola|Hola MyOS|1.0|Una ventana sencilla de bienvenida.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/hola.my|bb650ab90bfa714714203fe90f7f07a8fb76d94d73e5bb304cd91a410564f156
+paleta|Paleta|1.0|Elige un color con el mouse.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/paleta.my|790588f2e6051ca898b4869a195997164bb4996322239a0eb3a61fe1250aa10b
+pong|Pong|1.0|Juego para dos personas con teclado.|https://raw.githubusercontent.com/ciroparada81-boop/myos2-store/main/apps/pong.my|65d01f533cd5597f1509710d9d6e7adeea5ca32bca0dc75891931fe3fc42ac55

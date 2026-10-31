@@ -1,0 +1,9 @@
+window(440, 280, "Hola MyOS");
+clear(rgb(18, 24, 43));
+circle(220, 92, 48, rgb(91, 168, 255));
+circle(220, 92, 29, rgb(18, 24, 43));
+text(140, 166, "Bienvenido a MyOS", WHITE);
+text(94, 204, "Tu Store ya puede instalar programas.", rgb(170, 185, 210));
+text(116, 232, "Pulsa una tecla para cerrar.", rgb(130, 148, 180));
+flip();
+key(-1);

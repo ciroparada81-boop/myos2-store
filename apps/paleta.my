@@ -1,0 +1,21 @@
+window(480, 300, "Paleta de colores");
+var colors = [rgb(91, 168, 255), rgb(95, 227, 160), rgb(255, 125, 176), rgb(255, 168, 77), rgb(178, 139, 255), rgb(92, 200, 255)];
+var names = ["Azul", "Verde", "Rosa", "Naranja", "Violeta", "Cian"];
+var picked = 0;
+while (true) {
+    clear(rgb(20, 24, 40));
+    text(18, 14, "Selecciona un color. ESC para salir.", WHITE);
+    for (var i = 0; i < 6; i++) {
+        fill(18 + i * 75, 64, 62, 78, colors[i]);
+        text(20 + i * 75, 151, names[i], WHITE);
+    }
+    fill(20, 205, 440, 58, colors[picked]);
+    text(32, 225, "Color seleccionado: " + names[picked], BLACK);
+    flip();
+    var k = key(30);
+    if (k == KEY_ESC) { break; }
+    if (mouseb() == 1 && mousey() >= 64 && mousey() < 142) {
+        picked = (mousex() - 18) / 75;
+        picked = max(0, min(5, picked));
+    }
+}
